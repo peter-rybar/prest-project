@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "noImplicitAny": false,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "strictNullChecks": false,
+        "sourceMap": false,
+        "outDir": "build"
+    },
+    "include": [
+        "./src/app.ts",
+        "./src/cluster.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

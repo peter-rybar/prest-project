@@ -1,0 +1,39 @@
+{
+  "name": "project",
+  "version": "0.0.0",
+  "description": "project skelet",
+  "author": {
+    "name": "Peter Rybar",
+    "email": "pr.rybar@gmail.com",
+    "url": "http://prest-tech.appspot.com/peter-rybar"
+  },
+  "private": false,
+  "license": "GPL-3.0",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "cd client; npm install; cd ../server; npm install",
+    "dist": "cd client; npm run dist; cd ../server; npm run build",
+    "clean": "cd client; npm run clean; cd ../server; npm run clean",
+    "clean:all": "cd client; npm run clean:all; cd ../server; npm run clean:all"
+  },
+  "pre-commit": [
+    "dist"
+  ],
+  "pre-push": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peter-rybar/prest-project.git"
+  },
+  "keywords": [
+    "project",
+    "jsonml",
+    "widget",
+    "typescript"
+  ],
+  "devDependencies": {
+    "pre-commit": "^1.1.3",
+    "pre-push": "^0.1.1"
+  }
+}

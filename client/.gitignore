@@ -1,0 +1,14 @@
+.idea
+.vscode
+.project
+.settings
+.tmproj
+*.iml
+
+node_modules
+typings
+dist
+build
+tmp
+
+semantic.json
