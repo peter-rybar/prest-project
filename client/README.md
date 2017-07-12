@@ -1,6 +1,6 @@
-# Bufet
+# pREST Project
 
-Bufet project.
+pREST project.
 
 ## Development environment setup
 
