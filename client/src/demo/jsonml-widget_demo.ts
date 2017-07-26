@@ -19,30 +19,20 @@ class HelloWidget extends Widget {
         return this;
     }
 
-    onMount() {
-        console.log("onMount", this.type, this.id);
-    }
-
-    onUmount() {
-        console.log("onUmount", this.type, this.id);
-    }
-
     render(): JsonMLs {
         return [
-            ["input~i",
-                {
-                    type: "text", value: this._name,
-                    input: (e: Event) => {
-                        // const i = e.target as HTMLInputElement;
-                        const i = this.refs["i"] as HTMLInputElement;
-                        this._name = i.value;
-                        this.update();
-                    }
-                }
-            ],
+            ["input~i", { type: "text", value: this._name, input: this._onTextInput }],
             ["p", "Hello ", ["strong", this._name], " !"]
         ];
     }
+
+    private _onTextInput = (e: Event) => {
+        const i = e.target as HTMLInputElement;
+        // const i = this.refs["i"] as HTMLInputElement;
+        this._name = i.value;
+        this.update();
+    };
+
 }
 
 
@@ -74,12 +64,10 @@ class TimerWidget extends Widget {
     }
 
     onMount() {
-        console.log("onMount", this.type, this.id);
         this.toggle(true);
     }
 
     onUmount() {
-        console.log("onUmount", this.type, this.id);
         this.toggle(false);
     }
 
@@ -139,44 +127,16 @@ class FormWidget extends Widget {
         return this;
     }
 
-    onMount() {
-        console.log("onMount", this.type, this.id);
-    }
-
-    onUmount() {
-        console.log("onUmount", this.type, this.id);
-    }
-
     render(): JsonMLs {
         return [
             ["h2", this._title],
-            ["form",
-                {
-                    submit: (e: Event) => {
-                        e.preventDefault();
-                        console.log("submit", this._data);
-                        this._validateName((this.refs["name"] as HTMLInputElement).value);
-                        this._validateAge((this.refs["age"] as HTMLInputElement).value);
-                        if (this._errors.name || this._errors.age) {
-                            this.update();
-                        } else {
-                            this.sigData.emit(this._data);
-                            this.refs["data"].innerText = JSON.stringify(this._data, null, 4);
-                        }
-                    }
-                },
+            ["form", { submit: this._onFormSubmit },
                 ["p",
                     ["label", "Name ",
                         ["input~name",
                             {
                                 type: "text", size: 10, maxlength: 10,
-                                input: (e: Event) => {
-                                    const i = e.target as HTMLInputElement;
-                                    // const i = this.refs["name"] as  HTMLInputElement;
-                                    console.log("name", i.value);
-                                    this._validateName(i.value);
-                                    this.update();
-                                }
+                                input: this._onNameInput
                             }
                         ]
                     ], " ",
@@ -187,25 +147,48 @@ class FormWidget extends Widget {
                         ["input~age",
                             {
                                 type: "number", min: "1", max: "120",
-                                input: (e: Event) => {
-                                    const i = e.target as HTMLInputElement;
-                                    // const i = this.refs["age"] as  HTMLInputElement;
-                                    console.log("age", i.value);
-                                    this._validateAge(i.value);
-                                    this.update();
-                                }
+                                input: this._onAgeInput
                             }
                         ]
                     ], " ",
                     ["em.error", this._errors.age]
                 ],
                 ["p",
-                    ["input~submit", { type: "submit", value: "Submit" }]
+                    ["input", { type: "submit", value: "Submit" }]
                 ]
             ],
             ["pre~data"]
         ];
     }
+
+    private _onFormSubmit = (e: Event) => {
+        e.preventDefault();
+        console.log("submit", this._data);
+        this._validateName((this.refs["name"] as HTMLInputElement).value);
+        this._validateAge((this.refs["age"] as HTMLInputElement).value);
+        if (this._errors.name || this._errors.age) {
+            this.update();
+        } else {
+            this.sigData.emit(this._data);
+            this.refs["data"].innerText = JSON.stringify(this._data, null, 4);
+        }
+    };
+
+    private _onNameInput = (e: Event) => {
+        const i = e.target as HTMLInputElement;
+        // const i = this.refs["name"] as  HTMLInputElement;
+        console.log("name", i.value);
+        this._validateName(i.value);
+        this.update();
+    };
+
+    private _onAgeInput = (e: Event) => {
+        const i = e.target as HTMLInputElement;
+        // const i = this.refs["age"] as  HTMLInputElement;
+        console.log("age", i.value);
+        this._validateAge(i.value);
+        this.update();
+    };
 
     private _validateName(name: string) {
         if (name) {
@@ -254,14 +237,6 @@ class AppWidget extends Widget {
         this._title = title;
         this.update();
         return this;
-    }
-
-    onMount() {
-        console.log("onMount", this.type, this.id);
-    }
-
-    onUmount() {
-        console.log("onUmount", this.type, this.id);
     }
 
     render(): JsonMLs {
