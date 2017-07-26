@@ -46,7 +46,7 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
 
     let children = 0;
     for (let i = childIdx; i < jsonML.length; i++) {
-        if (jsonML[i].constructor !== Function) {
+        if (jsonML[i] && jsonML[i].constructor !== Function) {
             children++;
         }
     }

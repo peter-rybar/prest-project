@@ -1,14 +1,15 @@
 
-import { JsonMLs, jsonmls2html } from "../main/prest/jsonml";
+import { JsonMLs, jsonmls2htmls } from "../main/prest/jsonml";
 import { Widget } from "../main/prest/jsonml-widget";
+import { Signal } from "../main/prest/signal";
 
 
-class Hello extends Widget {
+class HelloWidget extends Widget {
 
     private _name: string;
 
     constructor(name: string) {
-        super("Hello");
+        super("HelloWidget");
         this._name = name;
     }
 
@@ -18,23 +19,26 @@ class Hello extends Widget {
         return this;
     }
 
-    domAttach() {
-        console.log("domAttach", this.type, this.id);
+    onMount() {
+        console.log("onMount", this.type, this.id);
     }
 
-    domDetach() {
-        console.log("domDetach", this.type, this.id);
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
     }
 
     render(): JsonMLs {
         return [
-            ["input~i", { type: "text", value: this._name,
-                input: (e: Event) => {
-                    // const i = e.target as HTMLInputElement;
-                    const i = this.refs["i"] as  HTMLInputElement;
-                    this._name = i.value;
-                    this.update();
-                } }
+            ["input~i",
+                {
+                    type: "text", value: this._name,
+                    input: (e: Event) => {
+                        // const i = e.target as HTMLInputElement;
+                        const i = this.refs["i"] as HTMLInputElement;
+                        this._name = i.value;
+                        this.update();
+                    }
+                }
             ],
             ["p", "Hello ", ["strong", this._name], " !"]
         ];
@@ -42,37 +46,40 @@ class Hello extends Widget {
 }
 
 
-class Timer extends Widget {
+class TimerWidget extends Widget {
 
     private _interval: number;
 
     constructor() {
-        super("Timer");
+        super("TimerWidget");
     }
 
     toggle(on?: boolean): void {
-        if (on === true) {
-            if (!this._interval) {
-                this._interval = setInterval(() => this.update(), 1000);
-            }
-        } else if (on === false) {
-            if (this._interval) {
-                clearInterval(this._interval);
-                this._interval = undefined;
-            }
-        } else {
-            this.toggle(!this._interval);
+        switch (on) {
+            case true:
+                if (!this._interval) {
+                    this._interval = setInterval(() => this.update(), 1000);
+                }
+                break;
+            case false:
+                if (this._interval) {
+                    clearInterval(this._interval);
+                    this._interval = undefined;
+                }
+                break;
+            default:
+                this.toggle(!this._interval);
         }
         this.update();
     }
 
-    domAttach() {
-        console.log("domAttach", this.type, this.id);
+    onMount() {
+        console.log("onMount", this.type, this.id);
         this.toggle(true);
     }
 
-    domDetach() {
-        console.log("domDetach", this.type, this.id);
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
         this.toggle(false);
     }
 
@@ -90,50 +97,193 @@ class Timer extends Widget {
 }
 
 
-class App extends Widget {
+interface FormData {
+    name: string;
+    age: number;
+}
 
-    private _title: string;
+interface FormErrors {
+    name: string;
+    age: string;
+}
 
-    readonly hello: Hello;
-    readonly timer: Timer;
+class FormWidget extends Widget {
 
-    constructor(title: string) {
-        super("App");
-        this._title = title;
-        this.hello = new Hello("peter");
-        this.timer = new Timer();
+    private _title: string = "";
+    private _data: FormData = { name: undefined, age: undefined };
+    private _errors: FormErrors = { name: "", age: "" };
+
+    readonly sigData = new Signal<FormData>();
+
+    constructor() {
+        super("FormWidget");
+    }
+
+    getTitle(): string {
+        return this._title;
     }
 
     setTitle(title: string): this {
         this._title = title;
+        this.update();
         return this;
     }
 
-    domAttach() {
-        console.log("domAttach", this.type, this.id);
+    getData(): FormData {
+        return this._data;
     }
 
-    domDetach() {
-        console.log("domDetach", this.type, this.id);
+    setData(data: FormData): this {
+        this._data = data;
+        this.update();
+        return this;
+    }
+
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+    }
+
+    render(): JsonMLs {
+        return [
+            ["h2", this._title],
+            ["form",
+                {
+                    submit: (e: Event) => {
+                        e.preventDefault();
+                        console.log("submit", this._data);
+                        this._validateName((this.refs["name"] as HTMLInputElement).value);
+                        this._validateAge((this.refs["age"] as HTMLInputElement).value);
+                        if (this._errors.name || this._errors.age) {
+                            this.update();
+                        } else {
+                            this.sigData.emit(this._data);
+                            this.refs["data"].innerText = JSON.stringify(this._data, null, 4);
+                        }
+                    }
+                },
+                ["p",
+                    ["label", "Name ",
+                        ["input~name",
+                            {
+                                type: "text", size: 10, maxlength: 10,
+                                input: (e: Event) => {
+                                    const i = e.target as HTMLInputElement;
+                                    // const i = this.refs["name"] as  HTMLInputElement;
+                                    console.log("name", i.value);
+                                    this._validateName(i.value);
+                                    this.update();
+                                }
+                            }
+                        ]
+                    ], " ",
+                    ["em.error", this._errors.name]
+                ],
+                ["p",
+                    ["label", "Age ",
+                        ["input~age",
+                            {
+                                type: "number", min: "1", max: "120",
+                                input: (e: Event) => {
+                                    const i = e.target as HTMLInputElement;
+                                    // const i = this.refs["age"] as  HTMLInputElement;
+                                    console.log("age", i.value);
+                                    this._validateAge(i.value);
+                                    this.update();
+                                }
+                            }
+                        ]
+                    ], " ",
+                    ["em.error", this._errors.age]
+                ],
+                ["p",
+                    ["input~submit", { type: "submit", value: "Submit" }]
+                ]
+            ],
+            ["pre~data"]
+        ];
+    }
+
+    private _validateName(name: string) {
+        if (name) {
+            this._data.name = name;
+            this._errors.name = "";
+        } else {
+            this._data.name = undefined;
+            this._errors.name = "Name required";
+        }
+    }
+
+    private _validateAge(age: string) {
+        if (age) {
+            if (isNaN(+age)) {
+                this._data.age = undefined;
+                this._errors.age = "Invalid age number";
+            } else {
+                this._data.age = +age;
+                this._errors.age = "";
+            }
+        } else {
+            this._data.age = undefined;
+            this._errors.age = "Age required";
+        }
+    }
+}
+
+
+class AppWidget extends Widget {
+
+    private _title: string = "App";
+
+    readonly helloWidget: HelloWidget;
+    readonly timerWidget: TimerWidget;
+    readonly formWidget: FormWidget;
+
+    constructor() {
+        super("AppWidget");
+        this.helloWidget = new HelloWidget("peter");
+        this.timerWidget = new TimerWidget();
+        this.formWidget = new FormWidget();
+        this.formWidget.sigData.connect(data => console.log("sig data", data));
+    }
+
+    setTitle(title: string): this {
+        this._title = title;
+        this.update();
+        return this;
+    }
+
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
     }
 
     render(): JsonMLs {
         return [
             ["h1", this._title],
-            this.hello,
+            this.helloWidget,
             ["hr"],
-            this.timer
+            this.timerWidget,
+            ["hr"],
+            this.formWidget
         ];
     }
 
 }
 
 
-const app = new App("MyApp").mount(document.getElementById("app"));
+const app = new AppWidget()
+    .setTitle("MyApp")
+    .mount(document.getElementById("app"));
 (self as any).app = app;
 
+
 // app html
-jsonmls2html(
-    ["app html", app.toJsonML()],
-    html => console.log(html),
-    true);
+const html = jsonmls2htmls(["app html", app.toJsonML()], true).join("");
+console.log(html);

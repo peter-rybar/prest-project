@@ -7,12 +7,12 @@ export const users: User[] = [
         login: "rybar",
         password: "peter",
         name: "Peter Rybár",
-        role: "admin"
+        roles: ["admin", "user"]
     },
     {
         login: "peter",
         password: "peter",
         name: "Peter",
-        role: "user"
+        roles: ["user"]
     }
 ];

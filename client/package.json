@@ -39,7 +39,6 @@
     "typescript": "2.3.x"
   },
   "dependencies": {
-    "incremental-dom": "^0.5.1",
-    "semantic-ui-css": "^2.2.10"
+    "incremental-dom": "^0.5.1"
   }
 }

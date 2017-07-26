@@ -4,7 +4,6 @@ import * as path from "path";
 import * as express from "express";
 import * as tdb from "./db";
 import { users } from "./data/users";
-import { products } from "./data/products";
 import { rootRouter } from "./router/root";
 import { jserrRouter } from "./router/jserr";
 
@@ -12,7 +11,6 @@ import { jserrRouter } from "./router/jserr";
 tdb.connect(__dirname + "/../db", () => console.log("db connected"));
 
 tdb.loadUsers(users);
-tdb.loadProducts(products);
 
 
 const app: express.Application = express();

@@ -3,8 +3,8 @@ import { JsonMLObj, JsonMLs, JsonML, jsonmls2idomPatch } from "./jsonml";
 
 
 export interface DomWidget {
-    domAttach?(): void;
-    domDetach?(): void;
+    onMount?(): void;
+    onUmount?(): void;
 }
 
 export abstract class Widget implements JsonMLObj, DomWidget {
@@ -31,13 +31,13 @@ export abstract class Widget implements JsonMLObj, DomWidget {
             (this as any).dom = e;
             const jsonMLs = (this as any).render();
             jsonmls2idomPatch(e, jsonMLs, this);
-            if ((this as any).domAttach) {
-                (this as any).domAttach();
+            if ((this as any).onMount) {
+                (this as any).onMount();
             }
             // onDetach(e, () => {
             //     (this as any).dom = undefined;
-            //     if ((this as any).domDetach) {
-            //         (this as any).domDetach();
+            //     if ((this as any).onUmount) {
+            //         (this as any).onUmount();
             //     }
             // });
         }
@@ -46,8 +46,8 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 
     umount(): this {
         if (this.dom) {
-            if ((this as any).domDetach) {
-                (this as any).domDetach();
+            if ((this as any).onUmount) {
+                (this as any).onUmount();
             }
             this.dom.parentElement.removeChild(this.dom);
             (this as any).dom = undefined;
@@ -56,10 +56,11 @@ export abstract class Widget implements JsonMLObj, DomWidget {
     }
 
     update(): this {
-        const e = this.dom;
-        if (e && !this._updateSched) {
+        if (this.dom && !this._updateSched) {
             this._updateSched = setTimeout(() => {
-                jsonmls2idomPatch(e, this.render(), this);
+                if (this.dom) {
+                    jsonmls2idomPatch(this.dom, this.render(), this);
+                }
                 this._updateSched = null;
             }, 0);
         }
@@ -67,19 +68,24 @@ export abstract class Widget implements JsonMLObj, DomWidget {
     }
 
     toJsonML(): JsonML {
+        if (this.dom && this._updateSched) {
+            clearTimeout(this._updateSched);
+            this._updateSched = null;
+        }
         const jsonMLs = (this as any).render();
-        return [this.type, { _id: this.id, _key: this.id },
+        return [
+            this.type, { _id: this.id, _key: this.id },
             ...jsonMLs,
             (e: HTMLElement) => {
                 if (!this.dom) {
                     (this as any).dom = e;
-                    if ((this as any).domAttach) {
-                        (this as any).domAttach();
+                    if ((this as any).onMount) {
+                        (this as any).onMount();
                     }
                     // onDetach(e, () => {
                     //     (this as any).dom = undefined;
-                    //     if ((this as any).domDetach) {
-                    //         (this as any).domDetach();
+                    //     if ((this as any).onUmount) {
+                    //         (this as any).onUmount();
                     //     }
                     // });
                 }

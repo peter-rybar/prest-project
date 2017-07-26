@@ -1,527 +1,285 @@
 
-import { http } from "./prest/http";
-import { Signal } from "./prest/signal";
 import { JsonMLs } from "./prest/jsonml";
 import { Widget } from "./prest/jsonml-widget";
-
-export const version: string = "@VERSION@";
-
-
-window.onerror = function (message, source, lineno, colno, error) {
-    http.post("jserr")
-        .send({
-            source: source,
-            message: message,
-            lineno: lineno,
-            colno: colno,
-            error: error,
-            error_stack: (<any>error).stack
-        });
-};
+import { Signal } from "./prest/signal";
 
 
-interface User {
-    login: string;
-    name: number;
-    role: string;
-}
+class HelloWidget extends Widget {
 
-interface Product {
-    code: string;
-    title: string;
-    description: string;
-    price: number;
-    count: number;
-    sold: number;
-}
+    private _name: string;
 
-interface OrderItem {
-    count: number;
-    product: Product;
-}
-
-interface Order {
-    items: OrderItem[];
-    count: number;
-    price: number;
-    timestamp?: string;
-}
-
-
-class MenuWidget extends Widget {
-
-    private _user: User;
-
-    readonly sigLogin = new Signal<void>();
-
-    constructor() {
-        super();
+    constructor(name: string) {
+        super("HelloWidget");
+        this._name = name;
     }
 
-    setUser(user: User): this {
-        this._user = user;
-        return this;
-    }
-
-    onSigLogin(slot: () => void): this {
-        this.sigLogin.connect(slot);
-        return this;
-    }
-
-    render(): JsonMLs {
-        return [
-            ["div.ui.segment.basic",
-                ["div.ui.secondary.pointing.menu",
-                    ["a.item.active", "Bufet"],
-                    ["a.item", { href: "#order" }, "Nákupný Košík"],
-                    ["a.item", { href: "#orders" }, "Objednávky"],
-                    ["div.right.menu",
-                        ["a.ui.item",
-                            ["span", { click: (e: Event) => this.sigLogin.emit() },
-                                this._user ?
-                                    ["span", { title: `login: ${this._user.login}` },
-                                        this._user.name + (this._user.role === "admin" ? " (admin)" : "")
-                                    ] :
-                                    ["span", { id: "login" }, "Login"]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
-    }
-
-}
-
-
-class ProductsWidget extends Widget {
-
-    private _products: Product[] = [];
-
-    readonly sigOrderItem = new Signal<OrderItem>();
-
-    setProducts(products: Product[]): this {
-        this._products = products;
+    setName(name: string): this {
+        this._name = name;
         this.update();
         return this;
     }
 
-    onSigOrderItem(slot: (o: OrderItem) => void): this {
-        this.sigOrderItem.connect(slot);
-        return this;
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
     }
 
     render(): JsonMLs {
         return [
-            ["div.products.ui.cards",
-                ...this._products.map(product => {
-                    return (
-                        ["div.product.card", { title: `code: ${product.code}` },
-                            // ["div.image", ["img", {src: "img.jpg"}]],
-                            ["div.content",
-                                ["div.header", product.title, " "],
-                                // ["div.meta", "novinka"],
-                                ["div.description", product.description]
-                            ],
-                            ["div.extra",
-                                ["strong.price", product.price.toFixed(2), "€ "],
-                                ["span.count.right.floated", "" + product.count, " na sklade"]
-                            ],
-                            ["div.ui.bottom.attached.button",
-                                {
-                                    click: () => this.sigOrderItem.emit({
-                                        product: product,
-                                        count: 1
-                                    })
-                                },
-                                ["i.icon.add.to.cart"],
-                                "Do košíka"
-                            ]
-                        ]
-                    );
-                })
-            ]
-        ];
-    }
-
-}
-
-
-class OrderWidget extends Widget {
-
-    private _orderItems: OrderItem[] = [];
-    private _message: string;
-    private _messageType: "info" | "error";
-
-    readonly sigOrder = new Signal<Order>();
-
-    setMessage(message = "", type: "info" | "error" = "info"): this {
-        this._message = message;
-        this._messageType = type;
-        return this;
-    }
-
-    empty(): this {
-        this._orderItems.length = 0;
-        return this;
-    }
-
-    add(orderItem: OrderItem): this {
-        const found = this._orderItems
-            .filter(o => o.product.code === orderItem.product.code);
-        if (found.length) {
-            found[0].count++;
-        } else {
-            this._orderItems.push(orderItem);
-        }
-        return this;
-    }
-
-    remove(orderItem: OrderItem): this {
-        const found = this._orderItems
-            .filter(o => o.product.code === orderItem.product.code);
-        if (found.length) {
-            if (found[0].count > 1) {
-                found[0].count--;
-            } else {
-                this._orderItems = this._orderItems
-                    .filter(o => o.product.code !== orderItem.product.code);
-            }
-        }
-        return this;
-    }
-
-    onSigOrder(slot: (o: Order) => void): this {
-        this.sigOrder.connect(slot);
-        return this;
-    }
-
-    render(): JsonMLs {
-        const price = this._orderItems.reduce(
-            (sum, order) => sum + order.product.price * order.count,
-            0);
-        const count = this._orderItems.reduce(
-            (count, order) => count + order.count,
-            0);
-        return [
-            ["table.orders.ui.table.selectable.compact",
-                ["thead",
-                    ["tr",
-                        ["th", "Produkt"],
-                        ["th", "Jedn. Cena"],
-                        ["th.center.aligned", "Počet"],
-                        ["th.center.aligned", "Cena"],
-                        ["th"]
-                    ]
-                ],
-                ["tbody",
-                    ...this._orderItems.map(orderItem => {
-                        return (
-                            ["tr.order", { title: `code: ${orderItem.product.code}` },
-                                ["td", orderItem.product.title],
-                                ["td", orderItem.product.price.toFixed(2), "€"],
-                                ["td.center.aligned", "" + orderItem.count],
-                                ["td.right.aligned", (orderItem.product.price * orderItem.count).toFixed(2), "€"],
-                                ["td.center.aligned",
-                                    ["button.ui.button.icon.tiny",
-                                        { click: () => this.remove(orderItem).update() },
-                                        ["i.icon.minus"]
-                                    ],
-                                    ["button.ui.button.icon.tiny",
-                                        { click: () => this.add(orderItem).update() },
-                                        ["i.icon.plus"]
-                                    ]
-                                ]
-                            ]
-                        );
-                    })
-                ],
-                ["tfoot.full-width",
-                    ["tr",
-                        ["th", { colspan: 2 }],
-                        ["th.center.aligned", ["strong", "" + count]],
-                        ["th.right.aligned", ["strong", price.toFixed(2)], "€"],
-                        ["th.center.aligned",
-                            ["button.order.ui.button" + (price ? "" : ".disabled"),
-                                {
-                                    click: (e: Event) => {
-                                        (e.target as Element).classList.add("loading");
-                                        this.sigOrder.emit(
-                                            {
-                                                items: this._orderItems,
-                                                count: count,
-                                                price: +price.toFixed(2)
-                                            });
-                                    }
-                                },
-                                // ["i.icon.send"],
-                                "Objednať"]
-                        ]
-                    ]
-                ]
-            ],
-            (this._message ?
-                ["div.ui.message." + this._messageType,
-                    ["i.close.icon", { click: () => this.setMessage().update() }],
-                    ["div.header", this._message]
-                    // ["p", "This is a special notification which you can dismiss if you're bored with it."]
-                ] :
-                [""])
-        ];
-    }
-
-}
-
-
-class OrdersStatsWidget extends Widget {
-
-    private _orders: Order[] = [];
-
-    setOrders(orders: Order[]): this {
-        this._orders = orders;
-        this.update();
-        return this;
-    }
-
-    render(): JsonMLs {
-        const orders = this._orders;
-        const sum = orders.map(o => o.price).reduce((sum, price) => sum + price, 0);
-        const count = orders.map(o => o.count).reduce((sum, count) => sum + count, 0);
-        return [
-            ["div.ui.statistics.small",
-                ["div.statistic.blue",
-                    ["div.value", "" + orders.length],
-                    ["div.label", "Objednávky"]
-                ],
-                ["div.statistic.green",
-                    ["div.value", "" + count],
-                    ["div.label", "Produkty"]
-                ],
-                ["div.statistic.red",
-                    ["div.value", sum.toFixed(2), "€"],
-                    ["div.label", "Celková cena"]
-                ]
-            ]
-        ];
-    }
-
-}
-
-
-class OrdersWidget extends Widget {
-
-    private _orders: Order[] = [];
-
-    empty(): this {
-        this._orders.length = 0;
-        return this;
-    }
-
-    getOrders(): Order[] {
-        return this._orders;
-    }
-
-    setOrders(orders: Order[]): this {
-        this._orders = orders;
-        return this;
-    }
-
-    render(): JsonMLs {
-        return [
-            ["table.orders.ui.table.selectable.compact",
-                ["thead",
-                    ["tr",
-                        ["th", "Produkt"],
-                        ["th", "Jedn. Cena"],
-                        ["th.center.aligned", "Počet"],
-                        ["th.center.aligned", "Cena"]
-                    ]
-                ],
-                ...this._orders
-                    .map(order => {
-                        return [
-                            ["tr.orders",
-                                ["td", { colspan: 4 },
-                                    ["strong", new Date(order.timestamp).toUTCString()]]
-                            ],
-                            ...order.items.map(orderItem => {
-                                return (
-                                    ["tr.order", { title: `code: ${orderItem.product.code}` },
-                                        ["td", orderItem.product.title],
-                                        ["td", orderItem.product.price.toFixed(2), "€"],
-                                        ["td.center.aligned", "" + orderItem.count],
-                                        ["td.right.aligned", (orderItem.product.price * orderItem.count).toFixed(2), "€"]
-                                    ]
-                                );
-                            }),
-                            ["tr.sumar",
-                                ["td", { colspan: 2 }],
-                                ["td.center.aligned", ["strong", "" + order.count]],
-                                ["td.right.aligned", ["strong", order.price.toFixed(2)], "€"]
-                            ]
-                        ];
-                    })
-                    .reduce((a, i) => a.concat(i), [])
-            ]
-        ];
-    }
-
-}
-
-
-class App extends Widget {
-
-    private _menuWidget: MenuWidget;
-    private _productsWidget: ProductsWidget;
-    private _orderWidget: OrderWidget;
-    private _ordersStatsWidget: OrdersStatsWidget;
-    private _ordersWidget: OrdersWidget;
-
-    private _user: User;
-
-    readonly sigUser = new Signal<User>();
-
-    constructor() {
-        super();
-        this._initMenu();
-        this._initProducts();
-        this._initOrder();
-        this._initOrdersStat();
-        this._initOrders();
-    }
-
-    render(): JsonMLs {
-        return [
-            ["div.ui.container",
-                this._menuWidget
-            ],
-            ["div.ui.container",
-                ["div.ui.basic.segment",
-                    ["h1", "Produkty"],
-                    this._productsWidget
-                ]
-            ],
-            ["div.ui.container",
-                ["div.ui.two.column.stackable.grid",
-                    ["div.column",
-                        ["div.ui.segment.basic",
-                            ["h2", { id: "order" }, "Nákupný Košík"],
-                            this._orderWidget
-                        ]
-                    ],
-                    ["div.column",
-                        ["div.ui.segment.basic",
-                            ["h2", "Sumár"],
-                            this._ordersStatsWidget
-                        ]
-                    ]
-                ]
-            ],
-            ["div.ui.container",
-                ["div.ui.segment.basic",
-                    ["h2", { id: "orders" }, "Objednávky"],
-                    this._ordersWidget
-                ]
-            ],
-            ["div.ui.vertical.segment.footer",
-                ["div.ui.container",
-                    ["div.ui.segment.basic",
-                        "Author: ",
-                        ["a", { href: "http://prest-tech.appspot.com/peter-rybar" },
-                            "Peter Rybár"
-                        ],
-                        " – Mail: ",
-                        ["a", { href: "mailto:pr.rybar@gmail.com" },
-                            "pr.rybar@gmail.com"
-                        ]
-                    ]
-                ]
-            ]
-        ];
-    }
-
-    private _login(): void {
-        http.get("/user")
-            .onResponse(res => {
-                const user = res.getJson().user as User;
-                this._user = user;
-                this.sigUser.emit(user);
-            })
-            .onError(err => console.error(err))
-            .send();
-    }
-
-    private _initMenu(): void {
-        this._menuWidget = new MenuWidget()
-            .onSigLogin(() => this._login());
-        this.sigUser.connect(user => this._menuWidget.setUser(user).update());
-    }
-
-    private _initProducts(): void {
-        this._productsWidget = new ProductsWidget()
-            .onSigOrderItem(order => {
-                if (this._user) {
-                    this._orderWidget.add(order).update();
-                } else {
-                    this._login();
+            ["input~i",
+                {
+                    type: "text", value: this._name,
+                    input: (e: Event) => {
+                        // const i = e.target as HTMLInputElement;
+                        const i = this.refs["i"] as HTMLInputElement;
+                        this._name = i.value;
+                        this.update();
+                    }
                 }
-            });
-        http.get("/products")
-            .onResponse(res =>
-                this._productsWidget.setProducts(res.getJson().products).update())
-            .onError(err => console.error(err))
-            .send();
+            ],
+            ["p", "Hello ", ["strong", this._name], " !"]
+        ];
+    }
+}
+
+
+class TimerWidget extends Widget {
+
+    private _interval: number;
+
+    constructor() {
+        super("TimerWidget");
     }
 
-    private _updateOrdersStats(): void {
-        http.get("/orders")
-            .onResponse(res =>
-                this._ordersStatsWidget.setOrders(res.getJson().orders).update())
-            .onError(err => console.error(err))
-            .send();
+    toggle(on?: boolean): void {
+        switch (on) {
+            case true:
+                if (!this._interval) {
+                    this._interval = setInterval(() => this.update(), 1000);
+                }
+                break;
+            case false:
+                if (this._interval) {
+                    clearInterval(this._interval);
+                    this._interval = undefined;
+                }
+                break;
+            default:
+                this.toggle(!this._interval);
+        }
+        this.update();
     }
 
-    private _postOrder(order: Order): void {
-        http.post("/order")
-            .onResponse(res => {
-                this._orderWidget.setMessage("Objednávka bola odoslaná").empty().update();
-                this._updateOrdersStats();
-                this._updateOrders();
-            })
-            .onError(err => {
-                console.error(err);
-                this._orderWidget
-                    .setMessage("Chyba odoslania objednávky: " +
-                        (err.currentTarget as XMLHttpRequest).status, "error")
-                    .update();
-            })
-            .send(order);
+    onMount() {
+        console.log("onMount", this.type, this.id);
+        this.toggle(true);
     }
 
-    private _initOrder(): void {
-        this._orderWidget = new OrderWidget()
-            .onSigOrder(order => this._postOrder(order));
-        this.sigUser.connect(user => this._updateOrdersStats());
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+        this.toggle(false);
     }
 
-    private _initOrdersStat(): void {
-        this._ordersStatsWidget = new OrdersStatsWidget();
-    }
-
-    private _updateOrders(): void {
-        http.get("/orders")
-            .onResponse(res =>
-                this._ordersWidget.setOrders(res.getJson().orders).update())
-            .onError(err => console.error(err))
-            .send();
-    }
-
-    private _initOrders(): void {
-        this._ordersWidget = new OrdersWidget();
-        this.sigUser.connect(user => this._updateOrders());
+    render(): JsonMLs {
+        return [
+            ["p", { style: this._interval ? "" : "color: lightgray;" },
+                "Time: ", new Date().toLocaleTimeString(), " ",
+                ["button", { click: (e: Event) => this.toggle() },
+                    this._interval ? "Stop" : "Start"
+                ]
+            ]
+        ];
     }
 
 }
 
 
-new App().mount(document.getElementById("app"));
+interface FormData {
+    name: string;
+    age: number;
+}
+
+interface FormErrors {
+    name: string;
+    age: string;
+}
+
+class FormWidget extends Widget {
+
+    private _title: string = "";
+    private _data: FormData = { name: undefined, age: undefined };
+    private _errors: FormErrors = { name: "", age: "" };
+
+    readonly sigData = new Signal<FormData>();
+
+    constructor() {
+        super("FormWidget");
+    }
+
+    getTitle(): string {
+        return this._title;
+    }
+
+    setTitle(title: string): this {
+        this._title = title;
+        this.update();
+        return this;
+    }
+
+    getData(): FormData {
+        return this._data;
+    }
+
+    setData(data: FormData): this {
+        this._data = data;
+        this.update();
+        return this;
+    }
+
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+    }
+
+    render(): JsonMLs {
+        return [
+            ["h2", this._title],
+            ["form",
+                {
+                    submit: (e: Event) => {
+                        e.preventDefault();
+                        console.log("submit", this._data);
+                        this._validateName((this.refs["name"] as HTMLInputElement).value);
+                        this._validateAge((this.refs["age"] as HTMLInputElement).value);
+                        if (this._errors.name || this._errors.age) {
+                            this.update();
+                        } else {
+                            this.sigData.emit(this._data);
+                            this.refs["data"].innerText = JSON.stringify(this._data, null, 4);
+                        }
+                    }
+                },
+                ["p",
+                    ["label", "Name ",
+                        ["input~name",
+                            {
+                                type: "text", size: 10, maxlength: 10,
+                                input: (e: Event) => {
+                                    const i = e.target as HTMLInputElement;
+                                    // const i = this.refs["name"] as  HTMLInputElement;
+                                    console.log("name", i.value);
+                                    this._validateName(i.value);
+                                    this.update();
+                                }
+                            }
+                        ]
+                    ], " ",
+                    ["em.error", this._errors.name]
+                ],
+                ["p",
+                    ["label", "Age ",
+                        ["input~age",
+                            {
+                                type: "number", min: "1", max: "120",
+                                input: (e: Event) => {
+                                    const i = e.target as HTMLInputElement;
+                                    // const i = this.refs["age"] as  HTMLInputElement;
+                                    console.log("age", i.value);
+                                    this._validateAge(i.value);
+                                    this.update();
+                                }
+                            }
+                        ]
+                    ], " ",
+                    ["em.error", this._errors.age]
+                ],
+                ["p",
+                    ["input~submit", { type: "submit", value: "Submit" }]
+                ]
+            ],
+            ["pre~data"]
+        ];
+    }
+
+    private _validateName(name: string) {
+        if (name) {
+            this._data.name = name;
+            this._errors.name = "";
+        } else {
+            this._data.name = undefined;
+            this._errors.name = "Name required";
+        }
+    }
+
+    private _validateAge(age: string) {
+        if (age) {
+            if (isNaN(+age)) {
+                this._data.age = undefined;
+                this._errors.age = "Invalid age number";
+            } else {
+                this._data.age = +age;
+                this._errors.age = "";
+            }
+        } else {
+            this._data.age = undefined;
+            this._errors.age = "Age required";
+        }
+    }
+}
+
+
+class AppWidget extends Widget {
+
+    private _title: string = "App";
+
+    readonly helloWidget: HelloWidget;
+    readonly timerWidget: TimerWidget;
+    readonly formWidget: FormWidget;
+
+    constructor() {
+        super("AppWidget");
+        this.helloWidget = new HelloWidget("peter");
+        this.timerWidget = new TimerWidget();
+        this.formWidget = new FormWidget();
+        this.formWidget.sigData.connect(data => console.log("sig data", data));
+    }
+
+    setTitle(title: string): this {
+        this._title = title;
+        this.update();
+        return this;
+    }
+
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+    }
+
+    render(): JsonMLs {
+        return [
+            ["h1", this._title],
+            this.helloWidget,
+            ["hr"],
+            this.timerWidget,
+            ["hr"],
+            this.formWidget
+        ];
+    }
+
+}
+
+
+const app = new AppWidget()
+    .setTitle("MyApp")
+    .mount(document.getElementById("app"));
+
+(self as any).app = app;

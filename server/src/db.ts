@@ -1,7 +1,7 @@
 
 // var MongoClient = require('mongodb').MongoClient
 
-import { User, Product } from "./model/model";
+import { User } from "./model/model";
 
 
 const state = {
@@ -51,19 +51,5 @@ export function loadUsers(users: User[]): void {
         (err, res) => {
             if (err) throw err;
             console.log("users insert", res);
-        });
-}
-
-export function loadProducts(products: Product[]): void {
-    const productsCollection = get().collection("products");
-    productsCollection.remove({},
-        (err, res) => {
-            if (err) throw err;
-            console.log("products remove", res);
-        });
-    productsCollection.insert(products,
-        (err, res) => {
-            if (err) throw err;
-            console.log("products insert", res);
         });
 }
