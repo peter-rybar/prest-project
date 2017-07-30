@@ -15,10 +15,6 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            './node_modules/immutable/dist/immutable.js',
-            './node_modules/three/build/three.js',
-            './node_modules/tsmonad/dist/tsmonad.js',
-            './node_modules/three/build/three.js',
             './node_modules/requirejs/require.js',
             './node_modules/karma-requirejs/lib/adapter.js',
             {pattern: './build/**/*.js', included: false},

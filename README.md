@@ -1,35 +1,27 @@
 # pREST Project
 
-pREST project.
+pREST project skeleton - client and server side web app based on JsonML technolgy.
 
-## Development environment setup
+## Install dependences
 
 `npm install`
 
-## Build project
-
-`npm run build`
-
-## Test project
-
-`npm run test`
-
-## Dist project
+## Build project distribution
 
 `npm run dist`
+
+## Run production server
+
+`npm run server:cluster`
+
+or
+
+`npm run server:pm2`
 
 ## Clean project
 
 `npm run clean`
 
-## Clean all project
+## Purge project
 
 `npm run clean:all`
-
-## Run development server
-
-`npm run server:watch`
-
-## Run production server
-
-`npm run server:cluster`

@@ -26,7 +26,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 
     abstract render(): JsonMLs;
 
-    mount(e: HTMLElement): this {
+    mount(e: HTMLElement = document.body): this {
         if (!this.dom) {
             (this as any).dom = e;
             const jsonMLs = (this as any).render();
@@ -68,9 +68,15 @@ export abstract class Widget implements JsonMLObj, DomWidget {
     }
 
     toJsonML(): JsonML {
-        if (this.dom && this._updateSched) {
-            clearTimeout(this._updateSched);
-            this._updateSched = null;
+        if (this.dom) {
+            if (this._updateSched) {
+                clearTimeout(this._updateSched);
+                this._updateSched = null;
+            } else {
+                return [
+                    this.type, { _skip: true, _id: this.id, _key: this.id }
+                ];
+            }
         }
         const jsonMLs = (this as any).render();
         return [

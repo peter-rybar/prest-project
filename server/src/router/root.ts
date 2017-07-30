@@ -6,7 +6,7 @@ import * as tdb from "../db";
 
 import { User } from "../model/model"
 import { authBasic } from "../middleware/authbasic";
-import { jsonmls2htmls } from "../../../client/src/main/prest/jsonml";
+import { jsonmls2htmls } from "../prest/jsonml";
 
 
 // parse application/json

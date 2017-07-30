@@ -2,13 +2,13 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "npm run build -- -w",
-    "clean": "rimraf build",
-    "clean:all": "npm run clean; rimraf node_modules",
     "server:watch:ts": "nodemon --watch ./src --watch ../client/build/main --watch ../client/dist --exec ts-node ./src/app.ts",
     "server:watch": "nodemon --watch ./build --watch ../client/build/main --watch ../client/dist ./build/app.js",
     "server:cluster": "NODE_ENV=production node ./build/cluster.js",
     "server:pm2": "NODE_ENV=production pm2 start ./build/app.js -i 0 --name project",
-    "pm2": "NODE_ENV=production pm2"
+    "pm2": "NODE_ENV=production pm2",
+    "clean": "rimraf build; rimraf dist",
+    "clean:all": "npm run clean; rimraf node_modules"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.3",

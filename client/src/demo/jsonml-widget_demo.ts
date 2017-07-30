@@ -1,5 +1,5 @@
 
-import { JsonMLs, jsonmls2htmls } from "../main/prest/jsonml";
+import { JsonMLs } from "../main/prest/jsonml";
 import { Widget } from "../main/prest/jsonml-widget";
 import { Signal } from "../main/prest/signal";
 
@@ -17,6 +17,14 @@ class HelloWidget extends Widget {
         this._name = name;
         this.update();
         return this;
+    }
+
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
     }
 
     render(): JsonMLs {
@@ -64,10 +72,12 @@ class TimerWidget extends Widget {
     }
 
     onMount() {
+        console.log("onMount", this.type, this.id);
         this.toggle(true);
     }
 
     onUmount() {
+        console.log("onUmount", this.type, this.id);
         this.toggle(false);
     }
 
@@ -97,7 +107,7 @@ interface FormErrors {
 
 class FormWidget extends Widget {
 
-    private _title: string = "";
+    private _title: string = "Form";
     private _data: FormData = { name: undefined, age: undefined };
     private _errors: FormErrors = { name: "", age: "" };
 
@@ -127,6 +137,14 @@ class FormWidget extends Widget {
         return this;
     }
 
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+    }
+
     render(): JsonMLs {
         return [
             ["h2", this._title],
@@ -154,7 +172,7 @@ class FormWidget extends Widget {
                     ["em.error", this._errors.age]
                 ],
                 ["p",
-                    ["input", { type: "submit", value: "Submit" }]
+                    ["input~submit", { type: "submit", value: "Submit" }]
                 ]
             ],
             ["pre~data"]
@@ -214,6 +232,7 @@ class FormWidget extends Widget {
             this._errors.age = "Age required";
         }
     }
+
 }
 
 
@@ -239,6 +258,14 @@ class AppWidget extends Widget {
         return this;
     }
 
+    onMount() {
+        console.log("onMount", this.type, this.id);
+    }
+
+    onUmount() {
+        console.log("onUmount", this.type, this.id);
+    }
+
     render(): JsonMLs {
         return [
             ["h1", this._title],
@@ -257,8 +284,3 @@ const app = new AppWidget()
     .setTitle("MyApp")
     .mount(document.getElementById("app"));
 (self as any).app = app;
-
-
-// app html
-const html = jsonmls2htmls(["app html", app.toJsonML()], true).join("");
-console.log(html);
