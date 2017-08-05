@@ -3,11 +3,11 @@ import replace from 'rollup-plugin-replace'
 // import babel   from 'rollup-plugin-babel'
 // import es2015 from 'babel-preset-es2015-rollup';
 import uglify from 'rollup-plugin-uglify';
-import { minify } from 'uglify-js';
+// import { minify } from 'uglify-es';
 
 const pkg = require('./package.json');
 
-console.log(`rollup index`);
+console.log('rollup index');
 
 export default {
     entry: './src/main/index.ts',
@@ -21,7 +21,7 @@ export default {
         // babel({
         //     presets: [es2015]
         // }),
-        uglify({}, minify)
+        uglify({}/*, minify*/)
     ],
     globals: {
         // 'jquery': 'jQuery'

@@ -285,3 +285,5 @@ const app = new AppWidget()
     .mount(document.getElementById("app"));
 
 (self as any).app = app;
+
+(self as any).VERSION = "@VERSION@";
