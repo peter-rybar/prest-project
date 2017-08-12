@@ -113,7 +113,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
 
     constructor(onHtml: (html: string) => void,
                 pretty: boolean = false,
-                indent: string = "\t") {
+                indent: string = "    ") {
         this._onHtml = onHtml;
         this._pretty = pretty;
         this._indent = indent;
@@ -246,7 +246,7 @@ export function jsonml2html(jsonML: JsonML, onHtml: (html: string) => void, pret
 export function jsonmls2html(jsonMLs: JsonMLs, onHtml: (html: string) => void, pretty = false): void {
     for (const jml of jsonMLs) {
         if (jml.constructor === String) {
-            onHtml(jml + "\n");
+            onHtml(jml + (pretty ? "\n" : ""));
         } else if ("toJsonML" in (jml as any)) {
             const obj = jml as JsonMLObj;
             jsonml2html(obj.toJsonML(), onHtml, pretty);
@@ -264,7 +264,7 @@ export function jsonml2htmls(jsonML: JsonML, pretty = false): string[] {
 
 export function jsonmls2htmls(jsonMLs: JsonMLs, pretty = false): string[] {
     const htmls: string[] = [];
-    jsonmls2html(jsonMLs, html => htmls.push(html), true);
+    jsonmls2html(jsonMLs, html => htmls.push(html), pretty);
     return htmls;
 }
 
