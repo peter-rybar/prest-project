@@ -32,12 +32,8 @@ if ((process.env as any).NODE_ENV === "production") {
 }
 
 
-let port = 3000;
-let host = "localhost";
-if ((process.env as any).NODE_ENV === "production") {
-    port = 3000;
-    host = "0.0.0.0";
-}
+const port = Number(process.env.PORT) || 3000;
+const host = process.env.HOST || ((process.env as any).NODE_ENV === "production" ? "0.0.0.0" : "localhost");
 
 const server = app.listen(port, host, () => {
     const host = server.address().address;
