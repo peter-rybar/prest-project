@@ -1,13 +1,14 @@
 ///<reference path="../../node_modules/@types/express/index.d.ts"/>
 
 import { Router, Request, Response } from "express";
-import * as bodyParser from "body-parser";
 import * as tdb from "../db";
 
 import { User } from "../model/model"
 import { authBasic } from "../middleware/authbasic";
 import { jsonmls2htmls } from "../prest/jsonml";
 
+
+// import * as bodyParser from "body-parser";
 
 // parse application/json
 // const jsonParser = bodyParser.json();
@@ -19,6 +20,9 @@ import { jsonmls2htmls } from "../prest/jsonml";
 
 // const textParser = bodyParser.text();
 // app.use(textParser);
+
+// import * as cookieParser from "cookie-parser";
+// app.use(cookieParser());
 
 // app.use(authBasic);
 
