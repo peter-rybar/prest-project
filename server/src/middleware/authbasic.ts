@@ -1,4 +1,7 @@
 
+import * as log4js from "log4js";
+var log = log4js.getLogger("auth");
+
 import * as basicAuth from "express-basic-auth";
 import * as tdb from "../db";
 import { User } from "../model/model";
@@ -10,11 +13,11 @@ export const authBasic = basicAuth({
         tdb.get().collection("users").findOne({ login: username },
             (err, user: User) => {
                 if (err) {
-                    console.error(err);
+                    log.error(err);
                     cb(null, false);
                 } else {
                     const auth = user && user.password === password;
-                    console.log("auth: ", username, password, user);
+                    log.info("auth: ", username, password, user);
                     cb(null, auth);
                 }
             });

@@ -1,5 +1,8 @@
 ///<reference path="../../node_modules/@types/express/index.d.ts"/>
 
+import * as log4js from "log4js";
+var log = log4js.getLogger("root");
+
 import { Router, Request, Response } from "express";
 import * as tdb from "../db";
 
@@ -61,7 +64,7 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 router.get("/user", authBasic, (req: Request, res: Response, next) => {
-    console.log("user get", req.params, req.query);
+    log.debug("user get", req.params, req.query);
     if ((req as any).auth) {
         tdb.get().collection("users").findOne({ login: (req as any).auth.user },
             (err, user: User) => {
@@ -84,7 +87,7 @@ router.get("/user", authBasic, (req: Request, res: Response, next) => {
 });
 
 router.get("/users", authBasic, (req: Request, res: Response, next) => {
-    console.log("users get", req.params, req.query);
+    log.debug("users get", req.params, req.query);
     tdb.get().collection("users").find().sort({ login: 1 }).toArray(
         (err, users) => {
             if (err) return next(err);

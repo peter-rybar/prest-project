@@ -24,7 +24,7 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.15.2",
     "express-basic-auth": "^1.0.1",
-    "morgan": "^1.8.2",
+    "log4js": "^2.3.3",
     "pm2": "^2.5.0",
     "tingodb": "^0.5.1",
     "ts-node": "^3.2.0"

@@ -1,6 +1,9 @@
 
 // var MongoClient = require('mongodb').MongoClient
 
+import * as log4js from "log4js";
+var log = log4js.getLogger("db");
+
 import { User } from "./model/model";
 
 
@@ -45,11 +48,11 @@ export function loadUsers(users: User[]): void {
     usersCollection.remove({},
         (err, res) => {
             if (err) throw err;
-            console.log("users remove", res);
+            log.debug("users remove", res);
         });
     usersCollection.insert(users,
         (err, res) => {
             if (err) throw err;
-            console.log("users insert", res);
+            log.debug("users insert:\n", res);
         });
 }
