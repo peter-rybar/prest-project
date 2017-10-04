@@ -1,7 +1,7 @@
 ///<reference path="../../node_modules/@types/express/index.d.ts"/>
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("jserr");
+const log = log4js.getLogger("jserr");
 
 import { Router, Request, Response } from "express";
 import * as bodyParser from "body-parser";

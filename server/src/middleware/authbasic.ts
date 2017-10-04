@@ -1,6 +1,6 @@
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("auth");
+const log = log4js.getLogger("auth");
 
 import * as basicAuth from "express-basic-auth";
 import * as tdb from "../db";

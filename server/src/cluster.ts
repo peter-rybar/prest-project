@@ -1,7 +1,7 @@
 ///<reference path="../node_modules/@types/express/index.d.ts"/>
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("cluster");
+const log = log4js.getLogger("cluster");
 
 import * as cluster from "cluster";
 

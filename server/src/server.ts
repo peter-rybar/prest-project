@@ -1,6 +1,6 @@
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("server");
+const log = log4js.getLogger("server");
 
 import { app } from "./app";
 

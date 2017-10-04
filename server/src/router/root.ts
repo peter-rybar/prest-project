@@ -1,12 +1,12 @@
 ///<reference path="../../node_modules/@types/express/index.d.ts"/>
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("root");
+const log = log4js.getLogger("root");
 
 import { Router, Request, Response } from "express";
 import * as tdb from "../db";
 
-import { User } from "../model/model"
+import { User } from "../model/model";
 import { authBasic } from "../middleware/authbasic";
 import { jsonmls2htmls } from "../prest/jsonml";
 
@@ -59,7 +59,7 @@ function indexPage(title: string): string {
 const router: Router = Router();
 
 router.get("/", (req: Request, res: Response) => {
-    res.set('Content-Type', 'text/html');
+    res.set("Content-Type", "text/html");
     res.send(indexPage("Project"));
 });
 
@@ -98,7 +98,7 @@ router.get("/users", authBasic, (req: Request, res: Response, next) => {
                         name: u.name,
                         password: u.password,
                         roles: u.roles
-                    }
+                    };
                 })
             });
         });

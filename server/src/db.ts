@@ -1,8 +1,8 @@
 
-// var MongoClient = require('mongodb').MongoClient
+// var MongoClient = require("mongodb").MongoClient
 
 import * as log4js from "log4js";
-var log = log4js.getLogger("db");
+const log = log4js.getLogger("db");
 
 import { User } from "./model/model";
 
@@ -29,7 +29,7 @@ export function connect(url, done): any {
 }
 
 export function get(): any {
-    return state.db
+    return state.db;
 }
 
 // export function close(done) {
