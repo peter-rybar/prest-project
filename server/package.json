@@ -4,19 +4,26 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "npm run build -- -w",
-    "server:watch:ts": "nodemon --watch ./src --watch ../client/build/main --watch ../client/dist --exec ts-node ./src/app.ts",
-    "server:watch": "nodemon --watch ./build --watch ../client/build/main --watch ../client/dist ./build/app.js",
+    "server:watch:ts": "nodemon --watch ./src --watch ../client/build/main --watch ../client/dist --exec ts-node ./src/server.ts",
+    "server:watch": "nodemon --watch ./build --watch ../client/build/main --watch ../client/dist ./build/server.js",
     "server:cluster": "NODE_ENV=production node ./build/cluster.js",
-    "server:pm2": "NODE_ENV=production pm2 start ./build/app.js -i 0 --name project",
+    "server:pm2": "NODE_ENV=production pm2 start ./build/server.js -i 0 --name project",
     "pm2": "NODE_ENV=production pm2",
     "clean": "rimraf build; rimraf dist",
-    "clean:all": "npm run clean; rimraf node_modules"
+    "clean:all": "npm run clean; rimraf node_modules",
+    "test": "mocha -r ts-node/register src/test/**/*.test.ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.3",
+    "@types/chai": "^4.0.4",
     "@types/express": "^4.0.35",
+    "@types/mocha": "^2.2.43",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "mocha": "^4.0.0",
     "nodemon": "^1.11.0",
     "rimraf": "^2.6.1",
+    "ts-node": "^3.3.0",
     "typescript": "2.3.x"
   },
   "dependencies": {
