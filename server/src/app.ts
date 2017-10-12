@@ -31,6 +31,8 @@ tdb.loadUsers(users);
 
 export const app: express.Application = express();
 
+app.disable("x-powered-by");
+
 app.use(log4js.connectLogger(log4js.getLogger("http"), { level: "auto" }));
 
 app.use("/", rootRouter);
