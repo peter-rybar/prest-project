@@ -1,4 +1,5 @@
 ///<reference path="../../node_modules/@types/express/index.d.ts"/>
+///<reference path="../../node_modules/@types/express-session/index.d.ts"/>
 
 import * as log4js from "log4js";
 const log = log4js.getLogger("root");
@@ -61,6 +62,18 @@ const router: Router = Router();
 router.get("/", (req: Request, res: Response) => {
     res.set("Content-Type", "text/html");
     res.send(indexPage("Project"));
+});
+
+router.get("/session", (req: Request, res: Response) => {
+    if (!req.session.count) {
+        req.session.count = 1;
+    } else {
+        req.session.count++;
+    }
+    log.info(req.session.id, req.session.count);
+
+    res.set("Content-Type", "text/plain");
+    res.send(`${req.session.id}: ${req.session.count}`);
 });
 
 router.get("/user", authBasic, (req: Request, res: Response, next) => {

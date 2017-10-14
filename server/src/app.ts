@@ -18,6 +18,8 @@ log.info("NODE_ENV:", process.env.NODE_ENV || "development");
 
 import * as path from "path";
 import * as express from "express";
+import * as helmet from "helmet";
+import * as session from "express-session";
 import * as tdb from "./db";
 import { users } from "./data/users";
 import { rootRouter } from "./router/root";
@@ -31,9 +33,21 @@ tdb.loadUsers(users);
 
 export const app: express.Application = express();
 
+app.use(log4js.connectLogger(log4js.getLogger("http"), { level: "auto" }));
+
+app.use(helmet());
+
 app.disable("x-powered-by");
 
-app.use(log4js.connectLogger(log4js.getLogger("http"), { level: "auto" }));
+app.set("trust proxy", 1); // trust first proxy
+app.use(session(
+    {
+        secret: "se-cu-re",
+        name: "sessionId",
+        resave: false,
+        saveUninitialized: true
+    }));
+// https://github.com/andybiar/express-passport-redis-template/blob/master/app.js
 
 app.use("/", rootRouter);
 app.use("/jserr", jserrRouter);
