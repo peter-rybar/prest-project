@@ -17,7 +17,7 @@ export const authBasic = (req, res, next) => {
                         cb(null, false);
                     } else {
                         const auth = user && user.password === password;
-                        log.info("auth: ", username, password, user);
+                        log.debug("auth: ", username, password, user);
                         req.user = user;
                         cb(null, auth);
                     }
