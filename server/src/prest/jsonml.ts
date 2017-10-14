@@ -138,6 +138,9 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                     case "classes":
                         classes = classes.concat(attrs[a]);
                         break;
+                    case "class":
+                        classes = classes.concat(attrs[a].split(" "));
+                        break;
                     case "data":
                         for (const d in attrs[a]) {
                             if (attrs[a].hasOwnProperty(d)) {
@@ -294,6 +297,9 @@ class JsonmlDomHandler implements JsonMLHandler {
                     case "classes":
                         classes = classes.concat(attrs[a]);
                         break;
+                    case "class":
+                        classes = classes.concat(attrs[a].split(" "));
+                        break;
                     case "data":
                         for (const d in attrs[a]) {
                             if (attrs[a].hasOwnProperty(d)) {
@@ -406,6 +412,9 @@ class JsonmlIDomHandler implements JsonMLHandler {
                         break;
                     case "classes":
                         classes = classes.concat(attrs[a]);
+                        break;
+                    case "class":
+                        classes = classes.concat(attrs[a].split(" "));
                         break;
                     case "data":
                         for (const d in attrs[a]) {
