@@ -11,6 +11,7 @@
     },
     "include": [
         "./src/app.ts",
+        "./src/server.ts",
         "./src/cluster.ts"
     ],
     "exclude": [

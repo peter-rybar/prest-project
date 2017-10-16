@@ -13,7 +13,7 @@ if (cluster.isMaster) {
 
     for (let i = 0; i < workers; i++) {
         log.info("cluster fork " + i + "/" + workers);
-        log.info.fork();
+        cluster.fork();
     }
 
     cluster.on("online", function(worker) {
