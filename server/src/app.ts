@@ -19,6 +19,7 @@ log.info("NODE_ENV:", process.env.NODE_ENV || "development");
 import * as path from "path";
 import * as express from "express";
 import * as helmet from "helmet";
+import * as compression from "compression";
 import * as session from "express-session";
 import * as tdb from "./db";
 import { users } from "./data/users";
@@ -38,6 +39,8 @@ app.use(log4js.connectLogger(log4js.getLogger("http"), { level: "auto" }));
 app.use(helmet());
 
 app.disable("x-powered-by");
+
+app.use(compression());
 
 app.set("trust proxy", 1); // trust first proxy
 app.use(session(
