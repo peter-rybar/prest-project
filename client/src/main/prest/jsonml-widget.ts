@@ -1,8 +1,21 @@
+// declare const process: any;
+// const __NODE = Boolean(
+//     typeof process === "object" &&
+//     process.versions &&
+//     process.versions.node);
+
+// if (__NODE) {
+//     console.log("I'm running in Node.JS");
+// } else {
+//     console.log("I'm running in browser");
+// }
 
 import { JsonMLObj, JsonMLs, JsonML, jsonmls2idomPatch } from "./jsonml";
 
 
 export interface DomWidget {
+    mount(e: HTMLElement): this;
+    umount(): this;
     onMount?(): void;
     onUmount?(): void;
 }
@@ -74,13 +87,22 @@ export abstract class Widget implements JsonMLObj, DomWidget {
                 this._updateSched = null;
             } else {
                 return [
-                    this.type, { _skip: true, _id: this.id, _key: this.id }
+                    "div", {
+                        _skip: true,
+                        _id: this.id,
+                        _key: this.id,
+                        widget: this.type
+                    }
                 ];
             }
         }
         const jsonMLs = (this as any).render();
         return [
-            this.type, { _id: this.id, _key: this.id },
+            "div", {
+                _id: this.id,
+                _key: this.id,
+                widget: this.type
+            },
             ...jsonMLs,
             (e: HTMLElement) => {
                 if (!this.dom) {

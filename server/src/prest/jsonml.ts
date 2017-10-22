@@ -106,6 +106,13 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
 
 class JsonmlHtmlHandler implements JsonMLHandler {
 
+    private static _pairTags = [
+        "script",
+        "html", "head", "body", "title",
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "p", "a", "pre", "blockquote", "i", "b", "em", "strong", "tt", "cite",
+        "ol", "ul", "li", "dl", "dt", "dd", "table", "tr", "td"];
+
     private _onHtml: (html: string) => void;
     private _pretty: boolean;
     private _indent: string;
@@ -181,7 +188,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
             html += this._mkIndent(this._depth);
             this._depth++;
         }
-        const pairTag = (children || tag === "script");
+        const pairTag = (children || JsonmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         html += "<" + tag + (args ? " " + args : "") + (pairTag ? ">" : "/>");
         if (this._pretty) {
             html += "\n";
@@ -192,7 +199,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
 
     close(tag: string, children: number, ctx?: any): void {
         let html = "";
-        const pairTag = (children || tag === "script");
+        const pairTag = (children || JsonmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {
             this._depth--;
             if (pairTag) {
