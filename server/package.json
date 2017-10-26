@@ -2,7 +2,7 @@
   "name": "project",
   "version": "0.0.0",
   "scripts": {
-    "tslint": "tslint --project tsconfig.json --type-check",
+    "tslint": "tslint --project tsconfig.json",
     "build": "tsc",
     "build:watch": "npm run build -- -w",
     "server:watch:ts": "nodemon --watch ./src --watch ../client/build/main --watch ../client/dist --exec ts-node ./src/server.ts",
@@ -26,6 +26,7 @@
     "nodemon": "^1.11.0",
     "rimraf": "^2.6.1",
     "ts-node": "^3.3.0",
+    "tslint": "^5.8.0",
     "typescript": "2.3.x"
   },
   "dependencies": {
