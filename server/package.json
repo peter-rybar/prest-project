@@ -10,8 +10,8 @@
     "server:cluster": "NODE_ENV=production node ./build/cluster.js",
     "server:pm2": "NODE_ENV=production pm2 start ./build/server.js -i 0 --name project",
     "pm2": "NODE_ENV=production pm2",
-    "clean": "rimraf build; rimraf dist",
-    "clean:all": "npm run clean; rimraf node_modules",
+    "clean": "rm -rf build; rm -rf dist",
+    "clean:all": "npm run clean; rm -rf node_modules",
     "test": "mocha -r ts-node/register src/test/**/*.test.ts"
   },
   "devDependencies": {
@@ -24,7 +24,6 @@
     "chai-http": "^3.0.0",
     "mocha": "^4.0.0",
     "nodemon": "^1.11.0",
-    "rimraf": "^2.6.1",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "2.3.x"

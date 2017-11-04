@@ -12,8 +12,8 @@
     "dist:watch": "npm run dist -- -w",
     "test": "node ./node_modules/karma-cli/bin/karma start ./karma.conf.js --single-run",
     "test:watch": "node ./node_modules/karma-cli/bin/karma start ./karma.conf.js",
-    "clean": "rimraf build; rimraf dist",
-    "clean:all": "npm run clean; rimraf node_modules"
+    "clean": "rm -rf build; rm -rf dist",
+    "clean:all": "npm run clean; rm -rf node_modules"
   },
   "devDependencies": {
     "@types/assertion-error": "^1.0.30",
@@ -30,7 +30,6 @@
     "karma-requirejs": "^1.1.0",
     "mocha": "^3.1.2",
     "requirejs": "^2.3.2",
-    "rimraf": "^2.5.4",
     "rollup": "^0.36.3",
     "rollup-multiple": "^0.41.6",
     "rollup-plugin-babel": "^2.6.1",
