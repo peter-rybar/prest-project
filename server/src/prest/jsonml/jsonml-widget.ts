@@ -10,7 +10,8 @@
 //     console.log("I'm running in browser");
 // }
 
-import { JsonMLObj, JsonMLs, JsonML, jsonmls2idomPatch } from "./jsonml";
+import { JsonML, JsonMLs, JsonMLObj } from "./jsonml";
+import { jsonmls2idomPatch } from "./jsonml-idom";
 
 
 export interface DomWidget {
@@ -44,6 +45,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
             (this as any).dom = e;
             const jsonMLs = (this as any).render();
             jsonmls2idomPatch(e, jsonMLs, this);
+            e.setAttribute("widget", this.type);
             if ((this as any).onMount) {
                 (this as any).onMount();
             }
@@ -61,6 +63,9 @@ export abstract class Widget implements JsonMLObj, DomWidget {
         if (this.dom) {
             if ((this as any).onUmount) {
                 (this as any).onUmount();
+            }
+            if (this.dom.hasAttribute("widget")) {
+                this.dom.removeAttribute("widget");
             }
             this.dom.parentElement.removeChild(this.dom);
             (this as any).dom = undefined;
@@ -166,3 +171,17 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 // };
 // observer.observe(document.getElementById("app"), config);
 // // observer.disconnect();
+
+
+// IncrementalDOM.notifications.nodesCreated = (nodes: Node[]) => {
+//     nodes.forEach(node => {
+//         // node may be an Element or a Text
+//         console.log("IncrementalDOM.notifications.nodesCreated", node);
+//     });
+// };
+// IncrementalDOM.notifications.nodesDeleted = (nodes: Node[]) => {
+//     nodes.forEach(node => {
+//         // node may be an Element or a Text
+//         console.log("IncrementalDOM.notifications.nodesDeleted", node);
+//     });
+// };

@@ -47,10 +47,11 @@ export abstract class Widget implements JsonMLObj, DomWidget {
                 this._updateSched = null;
             } else {
                 return [
-                    this.type, {
+                    "div", {
                         _skip: true,
                         _id: this.id,
-                        _key: this.id
+                        _key: this.id,
+                        widget: this.type
                     }
                 ];
             }

@@ -1,6 +1,7 @@
 
-import { JsonMLs } from "../main/prest/jsonml";
-import { Widget } from "../main/prest/jsonml-widget";
+import { jsonmls2htmls } from "../main/prest/jsonml/jsonml-html";
+import { JsonMLs } from "../main/prest/jsonml/jsonml";
+import { Widget } from "../main/prest/jsonml/jsonml-widget";
 import { Signal } from "../main/prest/signal";
 
 
@@ -39,7 +40,7 @@ class HelloWidget extends Widget {
         // const i = this.refs["i"] as HTMLInputElement;
         this._name = i.value;
         this.update();
-    };
+    }
 
 }
 
@@ -190,7 +191,7 @@ class FormWidget extends Widget {
             this.sigData.emit(this._data);
             this.refs["data"].innerText = JSON.stringify(this._data, null, 4);
         }
-    };
+    }
 
     private _onNameInput = (e: Event) => {
         const i = e.target as HTMLInputElement;
@@ -198,7 +199,7 @@ class FormWidget extends Widget {
         console.log("name", i.value);
         this._validateName(i.value);
         this.update();
-    };
+    }
 
     private _onAgeInput = (e: Event) => {
         const i = e.target as HTMLInputElement;
@@ -206,7 +207,7 @@ class FormWidget extends Widget {
         console.log("age", i.value);
         this._validateAge(i.value);
         this.update();
-    };
+    }
 
     private _validateName(name: string) {
         if (name) {
@@ -284,3 +285,13 @@ const app = new AppWidget()
     .setTitle("MyApp")
     .mount(document.getElementById("app"));
 (self as any).app = app;
+
+
+// app html
+const html = jsonmls2htmls(
+    [
+        "app html",
+        new AppWidget().setTitle("MyApp").toJsonML()
+    ],
+    true).join("");
+console.log(html);
