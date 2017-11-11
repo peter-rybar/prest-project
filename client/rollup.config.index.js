@@ -7,10 +7,12 @@ import uglify from 'rollup-plugin-uglify';
 
 const pkg = require('./package.json');
 
-console.log('rollup index');
+const bundle = 'index';
+
+console.log(`rollup bindling: '${bundle}'`);
 
 export default {
-    entry: './src/main/index.ts',
+    entry: `./src/main/${bundle}.ts`,
     plugins: [
         typescript({
             typescript: require('typescript')
@@ -29,7 +31,7 @@ export default {
     external: Object.keys(pkg.dependencies),
     targets: [
         {
-            dest: './dist/index.js',
+            dest: `./dist/${bundle}.js`,
             // format: 'iife',
             format: 'umd',
             moduleName: pkg.name,
