@@ -13,7 +13,7 @@
     "clean": "rm -rf build; rm -rf dist",
     "clean:all": "npm run clean; rm -rf node_modules",
     "test": "mocha -r ts-node/register src/test/**/*.test.ts",
-    "test:watch": "npm test; onchange 'src/**/*.ts' -v -- npm test"
+    "test:watch": "mocha -r ts-node/register --watch src/test/**/*.test.ts --watch-extensions ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.3",
@@ -25,7 +25,6 @@
     "chai-http": "^3.0.0",
     "mocha": "^4.0.0",
     "nodemon": "^1.11.0",
-    "onchange": "^3.2.1",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "2.3.x"
