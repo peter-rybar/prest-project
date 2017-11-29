@@ -18,7 +18,6 @@
   "devDependencies": {
     "@types/assertion-error": "^1.0.30",
     "@types/chai": "^3.4.34",
-    "@types/jquery": "^2.0.41",
     "@types/mocha": "^2.2.33",
     "chai": "^3.5.0",
     "karma": "^1.3.0",
@@ -37,7 +36,6 @@
     "rollup-plugin-typescript": "^0.8.1",
     "rollup-plugin-uglify": "^1.0.1",
     "rollup-watch": "^2.5.0",
-    "source-map-support": "^0.4.15",
     "tslint": "^5.8.0",
     "typescript": "2.3.x"
   },
