@@ -1,6 +1,3 @@
-///<reference path="../../node_modules/@types/express/index.d.ts"/>
-///<reference path="../../node_modules/@types/express-session/index.d.ts"/>
-
 import * as log4js from "log4js";
 const log = log4js.getLogger("root");
 

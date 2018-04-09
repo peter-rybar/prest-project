@@ -1,5 +1,3 @@
-///<reference path="../node_modules/@types/express/index.d.ts"/>
-
 import * as log4js from "log4js";
 if ((process.env as any).NODE_ENV === "production") {
     log4js.configure({
