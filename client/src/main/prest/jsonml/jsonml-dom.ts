@@ -20,6 +20,7 @@ class JsonmlDomHandler implements JsonMLHandler {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
+        let widget: any = attrs._widget;
         for (const a in attrs) {
             if (attrs.hasOwnProperty(a)) {
                 switch (a) {
@@ -28,6 +29,7 @@ class JsonmlDomHandler implements JsonMLHandler {
                     case "_ref":
                     case "_key":
                     case "_skip":
+                    case "_widget":
                         break;
                     case "id":
                         id = attrs[a];
@@ -77,6 +79,9 @@ class JsonmlDomHandler implements JsonMLHandler {
         } else {
             this.element = e;
             this._current = e;
+        }
+        if (widget && "mount" in widget && widget.mount.constructor === Function) {
+            widget.mount(e);
         }
         return attrs._skip ? true : false;
     }

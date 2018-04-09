@@ -41,8 +41,13 @@ export abstract class Widget implements JsonMLObj, DomWidget {
     abstract render(): JsonMLs;
 
     mount(e: HTMLElement = document.body): this {
+        if ("widget" in e) {
+            const w = (e as any).widget as Widget;
+            w && w.umount();
+        }
         if (!this.dom) {
             (this as any).dom = e;
+            (e as any).widget = this;
             const jsonMLs = (this as any).render();
             jsonmls2idomPatch(e, jsonMLs, this);
             e.setAttribute("widget", this.type);
@@ -67,7 +72,18 @@ export abstract class Widget implements JsonMLObj, DomWidget {
             if (this.dom.hasAttribute("widget")) {
                 this.dom.removeAttribute("widget");
             }
-            this.dom.parentElement.removeChild(this.dom);
+            const wNodes = this.dom.querySelectorAll("[widget]");
+            for (let i = 0; i < wNodes.length; i++) {
+                const w = (wNodes[i] as any).widget as Widget;
+                w && w.umount();
+            }
+            // if (this.dom.parentElement) {
+            //     this.dom.parentElement.removeChild(this.dom);
+            // }
+            while (this.dom.firstChild /*.hasChildNodes()*/) {
+                this.dom.removeChild(this.dom.firstChild);
+            }
+            (this.dom as any).widget = undefined;
             (this as any).dom = undefined;
         }
         return this;
@@ -89,44 +105,77 @@ export abstract class Widget implements JsonMLObj, DomWidget {
         if (this.dom) {
             if (this._updateSched) {
                 clearTimeout(this._updateSched);
-                this._updateSched = null;
+                this._updateSched = undefined;
             } else {
-                return [
-                    "div", {
-                        _skip: true,
-                        _id: this.id,
-                        _key: this.id,
-                        widget: this.type
-                    }
-                ];
+                return (
+                    ["div",
+                        {
+                            _skip: true,
+                            _id: this.id,
+                            _key: this.id,
+                            widget: this.type
+                        }
+                    ]
+                );
             }
         }
         const jsonMLs = (this as any).render();
-        return [
-            "div", {
-                _id: this.id,
-                _key: this.id,
-                widget: this.type
-            },
-            ...jsonMLs,
-            (e: HTMLElement) => {
-                if (!this.dom) {
-                    (this as any).dom = e;
-                    if ((this as any).onMount) {
-                        (this as any).onMount();
+        return (
+            ["div",
+                {
+                    _id: this.id,
+                    _key: this.id,
+                    widget: this.type
+                },
+                ...jsonMLs,
+                (e: HTMLElement) => {
+                    if (!this.dom) {
+                        (this as any).dom = e;
+                        (e as any).widget = this;
+                        if ((this as any).onMount) {
+                            (this as any).onMount();
+                        }
+                        // onDetach(e, () => {
+                        //     (this as any).dom = undefined;
+                        //     if ((this as any).onUmount) {
+                        //         (this as any).onUmount();
+                        //     }
+                        // });
                     }
-                    // onDetach(e, () => {
-                    //     (this as any).dom = undefined;
-                    //     if ((this as any).onUmount) {
-                    //         (this as any).onUmount();
-                    //     }
-                    // });
                 }
-            }
-        ];
+            ]
+        );
     }
 
 }
+
+
+declare var IncrementalDOM: any;
+
+IncrementalDOM.notifications.nodesDeleted = (nodes: Node[]) => {
+    nodes.forEach(node => {
+        if (node.nodeType === 1 && "widget" in node) {
+            const w = (node as any).widget as Widget;
+            w && w.umount();
+        }
+    });
+};
+
+
+// IncrementalDOM.notifications.nodesCreated = (nodes: Node[]) => {
+//     nodes.forEach(node => {
+//         // node may be an Element or a Text
+//         console.log("IncrementalDOM.notifications.nodesCreated", node);
+//     });
+// };
+// IncrementalDOM.notifications.nodesDeleted = (nodes: Node[]) => {
+//     nodes.forEach(node => {
+//         // node may be an Element or a Text
+//         console.log("IncrementalDOM.notifications.nodesDeleted", node);
+//     });
+// };
+
+
 
 // function onDetach(e: HTMLElement, callback: () => void) {
 //     new MutationObserver(mutations => {
@@ -171,17 +220,3 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 // };
 // observer.observe(document.getElementById("app"), config);
 // // observer.disconnect();
-
-
-// IncrementalDOM.notifications.nodesCreated = (nodes: Node[]) => {
-//     nodes.forEach(node => {
-//         // node may be an Element or a Text
-//         console.log("IncrementalDOM.notifications.nodesCreated", node);
-//     });
-// };
-// IncrementalDOM.notifications.nodesDeleted = (nodes: Node[]) => {
-//     nodes.forEach(node => {
-//         // node may be an Element or a Text
-//         console.log("IncrementalDOM.notifications.nodesDeleted", node);
-//     });
-// };

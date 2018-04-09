@@ -63,7 +63,7 @@ export function html(html: string): HTMLElement {
             const body = document.createElement("body");
             // keeping the attributes
             el.innerHTML = html.replace(/<body/g, "<div").replace(/<\/body>/g, "</div>");
-            const attrs = el.firstChild.attributes;
+            const attrs = (el.firstChild as Element).attributes;
             body.innerHTML = html;
             for (let i = 0; i < attrs.length; i++) {
                 body.setAttribute(attrs[i].name, attrs[i].value);

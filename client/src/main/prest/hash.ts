@@ -11,18 +11,18 @@ export class Hash<T> {
      */
     onChange(callback: (data: T) => void): this {
         if ("onhashchange" in window) {
-            window.onhashchange = () => {
+            onhashchange = () => {
                 callback(this.read());
             };
         } else {
             // prest.log.warning('browser "window.onhashchange" not implemented, running emulation');
-            let prevHash = window.location.hash;
+            let prevHash = location.hash;
             if (this._listenIntervalId) {
-                window.clearInterval(this._listenIntervalId);
+                clearInterval(this._listenIntervalId);
             }
-            this._listenIntervalId = window.setInterval(() => {
-                if (window.location.hash !== prevHash) {
-                    prevHash = window.location.hash;
+            this._listenIntervalId = setInterval(() => {
+                if (location.hash !== prevHash) {
+                    prevHash = location.hash;
                     callback(this.read());
                 }
             }, 500);
@@ -44,7 +44,7 @@ export class Hash<T> {
      * Returns decoded window.location.hash data
      */
     read(): T {
-        const str = window.location.hash.slice(1);
+        const str = location.hash.slice(1);
         return this._decoder(str);
     }
 
@@ -53,7 +53,7 @@ export class Hash<T> {
      */
     write(hashData: T) {
         const str = this._encoder(hashData);
-        window.location.hash = "#" + str;
+        location.hash = "#" + str;
     }
 
 }

@@ -36,6 +36,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
+        let widget: any = attrs._widget;
         for (const a in attrs) {
             if (attrs.hasOwnProperty(a)) {
                 switch (a) {
@@ -44,6 +45,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                     case "_ref":
                     case "_key":
                     case "_skip":
+                    case "_widget":
                         break;
                     case "id":
                         id = attrs[a];
@@ -88,6 +90,9 @@ class JsonmlHtmlHandler implements JsonMLHandler {
         if (id) {
             props.unshift(["id", id]);
         }
+        if (widget && "type" in widget) {
+            props.unshift(["widget", widget.type]);
+        }
         const args = props.map(p => `${p[0]}="${p[1]}"`).join(" ");
         let html = "";
         if (this._pretty) {
@@ -100,6 +105,19 @@ class JsonmlHtmlHandler implements JsonMLHandler {
             html += "\n";
         }
         this._onHtml(html);
+        if (widget && "render" in widget && widget.render.constructor === Function) {
+            const jsonMLs = widget.render() as JsonMLs;
+            for (const jml of jsonMLs) {
+                if (jml.constructor === String) {
+                    this._onHtml(jml + (this._pretty ? "\n" : ""));
+                } else if ("toJsonML" in (jml as any)) {
+                    const obj = jml as JsonMLObj;
+                    jsonml(obj.toJsonML(), this);
+                } else {
+                    jsonml(jml as JsonML, this);
+                }
+            }
+        }
         return false;
     }
 

@@ -52,7 +52,7 @@ String.prototype["template"] = function (fn, object) {
 */
 
 /**
- * Eemplate with same syntax as template literal
+ * Template with same syntax as template literal
  *
  * @param templateOrId
  * @param data

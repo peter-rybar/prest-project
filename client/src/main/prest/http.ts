@@ -21,7 +21,7 @@ export function decodeUrlQuery(queryStr: string): { [key: string]: string } {
 }
 
 export function encodeUrlQuery(query: any): string {
-    const key_value_pairs: any = [];
+    const key_value_pairs: any[] = [];
 
     for (const key in query) {
         if (query.hasOwnProperty(key)) {
@@ -33,7 +33,6 @@ export function encodeUrlQuery(query: any): string {
                             [key, typeof value[j] === "object" ?
                                 JSON.stringify(value[j]) : value[j]]);
                     }
-
                 } else {
                     key_value_pairs.push([key, JSON.stringify(value)]);
                 }
@@ -43,9 +42,9 @@ export function encodeUrlQuery(query: any): string {
         }
     }
 
+    const enc = encodeURIComponent;
     for (let j = 0, pair: any; pair = key_value_pairs[j++]; ) {
-        key_value_pairs[j - 1] = "" +
-            encodeURIComponent(pair[0]) + "=" + encodeURIComponent(pair[1]);
+        key_value_pairs[j - 1] = `${enc(pair[0])}=${enc(pair[1])}`;
     }
 
     return key_value_pairs.join("&");
@@ -100,17 +99,30 @@ export interface HttpProgress {
     total: number;
 }
 
-export type Method = "GET" | "POST" | "PUT" | "DELETE" |
-        "HEAD" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH";
+export type Method =
+    | "GET"
+    | "POST"
+    | "PUT"
+    | "DELETE"
+    | "PATCH"
+    | "HEAD"
+    | "CONNECT"
+    | "OPTIONS"
+    | "TRACE";
 
-export type ResponseType = "arraybuffer" | "blob" | "document" | "json" | "text";
+export type ResponseType =
+    | "arraybuffer"
+    | "blob"
+    | "document"
+    | "json"
+    | "text";
 
 export class HttpRequest {
 
     private _url: string;
     private _query: Object;
     private _method: Method = "GET";
-    private _headers: {[key: string]: string} = {};
+    private _headers: { [key: string]: string } = {};
     private _timeout: number;
     private _responseType: ResponseType;
 
@@ -121,9 +133,6 @@ export class HttpRequest {
     private _xhr: XMLHttpRequest;
     private _async: boolean = true;
     private _noCache: boolean = false;
-
-    constructor() {
-    }
 
     get(url: string, query?: Object): this {
         this.method("GET");
@@ -160,7 +169,7 @@ export class HttpRequest {
         return this;
     }
 
-    headers(headers: {[key: string]: string}): this {
+    headers(headers: { [key: string]: string }): this {
         for (const key in headers) {
             if (headers.hasOwnProperty(key)) {
                 this._headers[key] = headers[key];
@@ -223,17 +232,17 @@ export class HttpRequest {
         this._send(data, this._headers);
     }
 
-    private _send(data?: any, headers?: {[key: string]: string}): void {
+    private _send(data?: any, headers?: { [key: string]: string }): void {
         const xhr = new XMLHttpRequest();
         this._xhr = xhr;
 
         let url = this._url;
         if (this._query) {
             const query = encodeUrlQuery(this._query);
-            url = query ? (url + "?" + query) : url;
+            url = query ? `${url}?${query}` : url;
         }
         if (this._noCache) {
-            url += ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+            url += (/\?/.test(url) ? "&" : "?") + new Date().getTime();
         }
         // console.debug("HttpRequest: " + this._method + " " + url, data);
 
@@ -244,9 +253,10 @@ export class HttpRequest {
         if ("onprogress" in xhr) {
             if (this._onProgress) {
                 const onprogress = (e: ProgressEvent) => {
-                    if (e.lengthComputable) {
-                        this._onProgress({loaded: e.loaded, total: e.total});
-                    }
+                    this._onProgress({
+                        loaded: e.loaded,
+                        total: e.lengthComputable ? e.total : undefined
+                    });
                 };
                 xhr.upload.onprogress = onprogress;
                 xhr.onprogress = onprogress;
@@ -290,10 +300,10 @@ export class HttpRequest {
                     //    }
                     //    break;
                     case 4: // done
-                        if (
-                            (xhr.status >= 200 && xhr.status < 300) ||
-                            (xhr.status === 0 && !this._url.match(/^https?:\/\//)) // schemes other than http (file, ftp)
-                        ) {
+                        const httpStatusOk = xhr.status >= 200 && xhr.status < 300;
+                        // schemes other than http/https (file, ftp)
+                        const fileFtpStatusOk = xhr.status === 0 && !this._url.match(/^https?:\/\//);
+                        if (httpStatusOk || fileFtpStatusOk) {
                             if (this._onResponse) {
                                 this._onResponse(new HttpResponse(xhr));
                             }
@@ -307,7 +317,11 @@ export class HttpRequest {
             };
 
             if (data !== undefined) {
-                if ((typeof data === "string") || (data instanceof FormData) || (data instanceof Blob)) {
+                if (
+                    typeof data === "string" ||
+                    data instanceof FormData ||
+                    data instanceof Blob
+                ) {
                     xhr.send(data);
                 } else {
                     if (!this._headers["Content-Type"]) {
@@ -339,7 +353,7 @@ export class HttpRequest {
 
 export const http = {
 
-    get: function (url: string, query?: Object): HttpRequest {
+    get(url: string, query?: Object): HttpRequest {
         return new HttpRequest().method("GET").url(url, query);
     },
 
